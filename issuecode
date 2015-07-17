@@ -20,7 +20,8 @@ function get_file_name(){
     path=`pwd`
     sitename=`basename $path`
     filename="$sitename-$ver-$tm.zip"
-    filepath="/data/wwwroot/issue/$filename"
+    `mkdir ~/issuepack/`
+    filepath="~/issuepack/$filename"
 }
 
 function get_lastver(){
@@ -48,4 +49,8 @@ function send_server(){
 get_lastver
 get_file_name
 output_code
-send_server
+
+if [ $server = '-']; then
+else
+	send_server
+fi

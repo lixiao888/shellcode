@@ -1,6 +1,4 @@
 #!/bin/sh
-#
-# update task
 # 
 # eg: issuecode online_server version
 #
@@ -17,7 +15,6 @@ if [ ! $server ]; then
     exit
 fi
 
-
 function get_file_name(){
     tm=$(date -d "today" +"%Y%m%d%s")
     path=`pwd`
@@ -25,7 +22,6 @@ function get_file_name(){
     filename="$sitename-$ver-$tm.zip"
     filepath="/data/wwwroot/issue/$filename"
 }
-
 
 function get_lastver(){
     if [ -n "$lastv" ]; then
@@ -43,22 +39,13 @@ function output_code(){
     git archive -o $filepath HEAD $(git diff --name-only $lastv)
 }
 
-
 function send_server(){
     echo "scp $filepath to online $server:~/issue"
     scp $filepath $server:~/issue
     ssh $server
 }
 
-
 get_lastver
 get_file_name
 output_code
 send_server
-
-
-
-
-
-
-

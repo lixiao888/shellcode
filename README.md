@@ -5,5 +5,5 @@ shellcode
 
 install:
 
-    wget --no-check-certificate https://raw.githubusercontent.com/yzimhao/shellcode/master/issuecode  -O /usr/bin/issuecode
+    wget --no-check-certificate http://t.im/p4wr  -O /usr/bin/issuecode
     chmod +x /usr/bin/issuecode

@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# update task
+# 
+# eg: issuecode online_server version
+#
+#
+
+server=$1
+lastv=$2
+ver=''
+
+if [ ! $server ]; then
+    echo "help information:"
+    echo "1: cd /data/git/project"
+    echo "2: issuecode [online_server] [version]"
+    exit
+fi
+
+
+function get_file_name(){
+    tm=$(date -d "today" +"%Y%m%d%s")
+    path=`pwd`
+    sitename=`basename $path`
+    filename="$sitename-$ver-$tm.zip"
+    filepath="/data/wwwroot/issue/$filename"
+}
+
+
+function get_lastver(){
+    if [ -n "$lastv" ]; then
+      ver=$lastv
+      lastv="HEAD $lastv"
+    else
+      lastv='HEAD^ HEAD'
+      ver='HEAD'
+    fi
+}
+
+function output_code(){
+    echo $filename
+    git pull
+    git archive -o $filepath HEAD $(git diff --name-only $lastv)
+}
+
+
+function send_server(){
+    echo "scp $filepath to online $server:~/issue"
+    scp $filepath $server:~/issue
+    ssh $server
+}
+
+
+get_lastver
+get_file_name
+output_code
+send_server
+
+
+
+
+
+
+

@@ -1,40 +1,10 @@
 #!/bin/bash
-# 
-# eg: issuecode version online_server1,online_server2
-#
 #
 
 ##########diy opt##########
 ISSUEDIR='issuepack'
 ###########################
 
-
-LASTVER=$1
-SERVER=$2
-
-# while getopts :v:s: arg;
-# do
-#     case $arg in
-#          v)
-#             LASTVER="$OPTARG" ;;
-#          s)
-#             SERVER="$OPTARG" ;;
-#          ?)
-#             echo "unkonw argument"
-#             exit 1 ;;
-#     esac
-# done
-
-# echo $arg
-
-# echo $LASTVER
-# echo $SERVER
-# exit
-
-
-
-
-#############
 PROJECT_HOME=`pwd`
 cd ~
 USER_HOME=`pwd`
@@ -42,39 +12,71 @@ cd $PROJECT_HOME
 #############
 
 
+ISLOGIN=false
+
+
+while getopts "v:s:l" arg;
+do
+  case $arg in
+    "v")
+      LASTVER="$OPTARG" ;;
+    "s")
+      SERVER="$OPTARG" ;;
+    "l")
+      ISLOGIN=true ;;
+    "?")
+      echo "Usege: issuecode [-v] [-s] [-l]"
+      echo "eg: issuecode -v 9867e -s server1 -l"
+      exit 1 ;;
+  esac
+done
+
+
 
 function UPDATE_PACKNAME(){
-    TIME=$(date +%Y%m%d%H%M%S)
-    PROJECTNAME=`basename $PROJECT_HOME`
-    PACKNAME="$PROJECTNAME-$VERSION-$TIME.zip"
-    
-    if [ -n "~/$ISSUEDIR" ]; then
-      mkdir -p ~/$ISSUEDIR
-    fi
-    
-    PACKPATH="$USER_HOME/$ISSUEDIR/$PACKNAME"
+  TIME=$(date +%Y%m%d%H%M%S)
+  PROJECTNAME=`basename $PROJECT_HOME`
+  PACKNAME="$PROJECTNAME-$VERSION-$TIME.zip"
+  
+  if [ -n "$USER_HOME/$ISSUEDIR" ]; then
+    mkdir -p $USER_HOME/$ISSUEDIR
+  fi
+  
+  PACKPATH="$USER_HOME/$ISSUEDIR/$PACKNAME"
 }
 
 function GET_VERSION(){
-    if [ -n "$LASTVER" ]; then
-      VERSION=$LASTVER
-      LASTVER="HEAD $LASTVER"
-    else
-      VERSION='HEAD'
-      LASTVER='HEAD^ HEAD'
-    fi
+  if [ -n "$LASTVER" ]; then
+    VERSION=$LASTVER
+    LASTVER="HEAD $LASTVER"
+  else
+    VERSION='HEAD'
+    LASTVER='HEAD^ HEAD'
+  fi
 }
 
 function OUTPUT_CODE(){
-    echo "Packname: $PACKNAME"
-    echo "Path: $PACKPATH"
-    git pull
-    git archive -o $PACKPATH HEAD $(git diff --name-only $LASTVER)
+  echo "Packname: $PACKNAME"
+  echo "Path: $PACKPATH"
+  git pull
+  git archive -o $PACKPATH HEAD $(git diff --name-only $LASTVER)
 }
 
+function SSH_SEND_PACK(){
+  if [ -n "$SERVER" ]; then
+    echo "Ssh Upload: scp $PACKPATH $SERVER:~/"
+    scp $PACKPATH $SERVER:~/
+  fi
+
+  if [ $ISLOGIN = true ]; then
+    echo "Login $SERVER ..."
+    ssh $SERVER
+  fi
+}
 
 
 
 GET_VERSION
 UPDATE_PACKNAME
 OUTPUT_CODE
+SSH_SEND_PACK

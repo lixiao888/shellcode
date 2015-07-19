@@ -1,56 +1,80 @@
-﻿#!/bin/bash
+#!/bin/bash
 # 
-# eg: issuecode online_server version
+# eg: issuecode version online_server1,online_server2
 #
 #
 
-server=$1
-lastv=$2
-ver=''
+##########diy opt##########
+ISSUEDIR='issuepack'
+###########################
 
-if [ ! $server ]; then
-    echo "help information:"
-    echo "1: cd /data/git/project"
-    echo "2: issuecode [online_server] [version]"
-    exit
-fi
 
-function get_file_name(){
-    tm=$(date -d "today" +"%Y%m%d%s")
-    path=`pwd`
-    sitename=`basename $path`
-    filename="$sitename-$ver-$tm.zip"
-    `mkdir ~/issuepack/`
-    filepath="~/issuepack/$filename"
+LASTVER=$1
+SERVER=$2
+
+# while getopts :v:s: arg;
+# do
+#     case $arg in
+#          v)
+#             LASTVER="$OPTARG" ;;
+#          s)
+#             SERVER="$OPTARG" ;;
+#          ?)
+#             echo "unkonw argument"
+#             exit 1 ;;
+#     esac
+# done
+
+# echo $arg
+
+# echo $LASTVER
+# echo $SERVER
+# exit
+
+
+
+
+#############
+PROJECT_HOME=`pwd`
+cd ~
+USER_HOME=`pwd`
+cd $PROJECT_HOME
+#############
+
+
+
+function UPDATE_PACKNAME(){
+    TIME=$(date +%Y%m%d%H%M%S)
+    PROJECTNAME=`basename $PROJECT_HOME`
+    PACKNAME="$PROJECTNAME-$VERSION-$TIME.zip"
+    
+    if [ -n "~/$ISSUEDIR" ]; then
+      mkdir -p ~/$ISSUEDIR
+    fi
+    
+    PACKPATH="$USER_HOME/$ISSUEDIR/$PACKNAME"
 }
 
-function get_lastver(){
-    if [ -n "$lastv" ]; then
-      ver=$lastv
-      lastv="HEAD $lastv"
+function GET_VERSION(){
+    if [ -n "$LASTVER" ]; then
+      VERSION=$LASTVER
+      LASTVER="HEAD $LASTVER"
     else
-      lastv='HEAD^ HEAD'
-      ver='HEAD'
+      VERSION='HEAD'
+      LASTVER='HEAD^ HEAD'
     fi
 }
 
-function output_code(){
-    echo $filename
+function OUTPUT_CODE(){
+    echo "Packname: $PACKNAME"
+    echo "Path: $PACKPATH"
     git pull
-    git archive -o $filepath HEAD $(git diff --name-only $lastv)
+    git archive -o $PACKPATH HEAD $(git diff --name-only $LASTVER)
 }
 
-function send_server(){
-    echo "scp $filepath to online $server:~/issue"
-    scp $filepath $server:~/issue
-    ssh $server
-}
 
-get_lastver
-get_file_name
-output_code
 
-if [ $server = '-']; then
-else
-	send_server
-fi
+
+GET_VERSION
+UPDATE_PACKNAME
+OUTPUT_CODE

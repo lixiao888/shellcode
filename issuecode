@@ -4,16 +4,13 @@
 ##########diy opt##########
 ISSUEDIR='issuepack'
 ###########################
-
-PROJECT_HOME=`pwd`
+PWD_HOME=`pwd`
 cd ~
 USER_HOME=`pwd`
-cd $PROJECT_HOME
+cd $PWD_HOME
 #############
 
-
 ISLOGIN=false
-
 
 while getopts "v:s:l" arg;
 do
@@ -31,6 +28,32 @@ do
   esac
 done
 
+
+function WHERE_PROJECT_HOME(){
+  ISGIT=false
+  GITPATH=$1
+  
+  if [ $GITPATH = '/' ]; then
+    echo "The current path is not a git management project!"
+    exit 1
+  fi
+
+  a=`ls -a $GITPATH`
+  for b in $a
+  do
+    if [ $b = '.git' ]; then
+      ISGIT=true
+      break
+    fi
+  done
+
+  if [ $ISGIT = true ]; then
+    PROJECT_HOME=$GITPATH
+  else
+    PARENT=`dirname $GITPATH`
+    WHERE_PROJECT_HOME $PARENT
+  fi
+}
 
 
 function UPDATE_PACKNAME(){
@@ -58,6 +81,7 @@ function GET_VERSION(){
 function OUTPUT_CODE(){
   echo "Packname: $PACKNAME"
   echo "Path: $PACKPATH"
+  cd $PROJECT_HOME
   git pull
   git archive -o $PACKPATH HEAD $(git diff --name-only $LASTVER)
 }
@@ -75,6 +99,7 @@ function SSH_SEND_PACK(){
 }
 
 
+WHERE_PROJECT_HOME $PWD_HOME
 
 GET_VERSION
 UPDATE_PACKNAME

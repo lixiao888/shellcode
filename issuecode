@@ -79,11 +79,11 @@ function GET_VERSION(){
 }
 
 function OUTPUT_CODE(){
-  echo "Packname: $PACKNAME"
-  echo "Path: $PACKPATH"
   cd $PROJECT_HOME
   git pull
   git archive -o $PACKPATH HEAD $(git diff --name-only $LASTVER)
+  echo "Packname: $PACKNAME"
+  echo "Path: $PACKPATH"
 }
 
 function SSH_SEND_PACK(){

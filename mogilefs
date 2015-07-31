@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# mogilefsd    Startup script for the MogileFS tracker
+#
+# chkconfig: - 85 15
+# description: MogileFS tracker
+# processname: mogilefsd
+# config: /etc/mogilefs/mogilefsd.conf
+# pidfile: /var/run/mogilefsd.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+# . /lib/lsb/init-functions
+
+# Path to the apachectl script, server binary, and short-form for messages.
+lockfile=${LOCKFILE-/var/lock/mogilefsd}
+RETVAL=0
+
+start() {
+     echo -n $"Starting mogilefsd: "
+     sudo -u mogile /usr/local/bin/mogilefsd -c /etc/mogilefs/mogilefsd.conf --daemon
+     RETVAL=$?
+     echo
+     [ $RETVAL = 0 ] && touch ${lockfile}
+     return $RETVAL
+}
+stop() {
+     echo -n $"Stopping mogilefsd: "
+     killproc mogilefsd
+     RETVAL=$?
+     echo
+     [ $RETVAL = 0 ] && rm -f ${lockfile}
+}
+reload() {
+    echo -n $"Reloading mogilefsd: "
+     killproc mogilefsd -HUP
+     RETVAL=$?
+     echo
+}
+
+# See how we were called.
+case "$1" in
+   start)
+     start
+     ;;
+   stop)
+     stop
+     ;;
+   status)
+     status mogilefsd
+     RETVAL=$?
+     ;;
+   restart)
+     stop
+     start
+     ;;
+   reload)
+     reload
+     ;;
+   *)
+     echo $"Usage: mogilefsd     {start|stop|restart|reload|status}"
+     exit 1
+esac
+
+exit $RETVAL

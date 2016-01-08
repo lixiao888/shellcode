@@ -1,0 +1,5 @@
+#!/bin/bash
+
+LIVE=$1
+SAVE=$2
+/usr/local/ffmpeg/bin/ffmpeg -y -i $LIVE -acodec aac -strict -2 -vcodec libx264 -r 15 -g 30 $SAVE
